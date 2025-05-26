@@ -7,15 +7,17 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        // usa args[0] se passado, senão "female_names.txt"
-        String file = (args.length > 0) ? args[0] : "female_names.txt";
+        // usa args[0] se passado, senão "src/female_names.txt"
+        // ALTERAÇÃO AQUI: Adicionado "src/" ao caminho padrão do arquivo
+        String file = (args.length > 0) ? args[0] : "src/female_names.txt";
 
         // lê todos os nomes do arquivo (espera ~5000 linhas)
         List<String> names = Files.readAllLines(Paths.get(file));
 
-        // testa as duas tabelas
-        runTest("Divisão (hashCode % size)",   new HashTableModular(10007), names);
-        runTest("Soma ASCII (sum chars % size)", new HashTableAsciiSum(10007), names);
+        // ... restante do seu código ...
+
+        runTest("Divisão (hashCode % size)",   new HashTableModular(), names);
+        runTest("Soma ASCII (sum chars % size)", new HashTableAsciiSum(), names);
     }
 
     private static void runTest(String label, HashTable ht, List<String> data) {

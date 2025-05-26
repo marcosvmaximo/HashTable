@@ -1,45 +1,61 @@
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList; // Removido pois não usaremos mais ArrayList para a estrutura principal
+// import java.util.List;    // Removido
 
 public abstract class HashTable {
     protected int size;
-    protected List<List<String>> buckets; // Mesmo tamanho do size
+    protected Node[] buckets; // Array de nós (cabeças das listas encadeadas)
     protected int collisions = 0;
     protected int count = 0;   // total de chaves inseridas
-    protected final double loadFactor = 0.75; // Fator
+    protected final double loadFactor = 0.75; // Fator de Carga
+
+    // Nó para a lista encadeada (chaining)
+    protected static class Node { // Classe Node está correta
+        String key;
+        Node next; // Campo next pertence a Node
+
+        Node(String key) {
+            this.key = key;
+            this.next = null; // 'this' aqui se refere à instância de Node, 'this.next' está ok
+        }
+    }
 
     public HashTable() {
-        this(16);
+        this(16); // Capacidade inicial padrão
     }
 
     // Construtor customizado
     public HashTable(int initialCapacity) {
         this.size = initialCapacity;
-        this.buckets = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            buckets.add(new ArrayList<>());
-        }
+        this.buckets = new Node[size]; // 'this.buckets' e 'this.size' estão corretos
     }
 
     public void insert(String key) {
-        // Redimensiona
         if ((double)(count + 1) / size > loadFactor) {
             resize();
         }
-
-        // 2) hash + chaining
         int idx = hash(key);
-        List<String> bucket = buckets.get(idx);
-        if (!bucket.isEmpty()) {
+        Node newNode = new Node(key); // newNode é do tipo Node
+
+        if (buckets[idx] == null) { // Acesso a buckets[idx] está correto
+            buckets[idx] = newNode;
+        } else {
             collisions++;
+            newNode.next = buckets[idx]; // newNode.next e buckets[idx] (que é um Node) estão corretos
+            buckets[idx] = newNode;
         }
-        bucket.add(key);
         count++;
     }
 
     public boolean search(String key) {
         int idx = hash(key);
-        return buckets.get(idx).contains(key);
+        Node current = buckets[idx]; // current é do tipo Node
+        while (current != null) {
+            if (current.key.equals(key)) {
+                return true;
+            }
+            current = current.next; // current.next está correto
+        }
+        return false;
     }
 
     public int getCollisions() {
@@ -47,33 +63,45 @@ public abstract class HashTable {
     }
 
     public int[] getDistribution() {
-        int[] dist = new int[size];
+        int[] dist = new int[size]; // size está correto
         for (int i = 0; i < size; i++) {
-            dist[i] = buckets.get(i).size();
+            Node current = buckets[i]; // current é do tipo Node
+            int bucketSize = 0;
+            while (current != null) {
+                bucketSize++;
+                current = current.next; // current.next está correto
+            }
+            dist[i] = bucketSize;
         }
         return dist;
     }
 
-    // Dobrar capacidade e re-hash de todas as chaves
     private void resize() {
-        int newSize = size * 2;
-        List<List<String>> newBuckets = new ArrayList<>(newSize);
-        for (int i = 0; i < newSize; i++) {
-            newBuckets.add(new ArrayList<>());
-        }
+        Node[] oldBuckets = this.buckets; // this.buckets está correto
+        int oldSize = this.size; // this.size está correto
 
-        // Ajusta size antes do re-hash para usar a mesma função hash()
-        this.size = newSize;
-        // Re-insere tudo nos novos buckets (mantém collisions e count originais)
-        for (List<String> bucket : buckets) {
-            for (String key : bucket) {
-                int idx = hash(key);
-                newBuckets.get(idx).add(key);
+        this.size = oldSize * 2;
+        this.buckets = new Node[this.size]; // this.buckets e this.size estão corretos
+        this.count = 0;
+
+        for (int i = 0; i < oldSize; i++) {
+            Node current = oldBuckets[i]; // current é Node
+            while (current != null) {
+                String keyToRehash = current.key;
+                int newIdx = hash(keyToRehash);
+
+                Node newNode = new Node(keyToRehash); // newNode é Node
+                if (this.buckets[newIdx] == null) { // this.buckets está correto
+                    this.buckets[newIdx] = newNode;
+                } else {
+                    newNode.next = this.buckets[newIdx]; // newNode.next e this.buckets[newIdx] (Node) estão corretos
+                    this.buckets[newIdx] = newNode;
+                }
+                this.count++;
+                current = current.next; // current.next está correto
             }
         }
-        this.buckets = newBuckets;
     }
 
-    // Cada subclasse define sua função hash
     protected abstract int hash(String key);
 }
