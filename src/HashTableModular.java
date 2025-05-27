@@ -7,3 +7,4 @@ public class HashTableModular extends HashTable {
         return Math.abs(key.hashCode()) % size;
     }
 }
+//
