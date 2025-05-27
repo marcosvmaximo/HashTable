@@ -1,32 +1,27 @@
-// import java.util.ArrayList; // Removido pois não usaremos mais ArrayList para a estrutura principal
-// import java.util.List;    // Removido
-
 public abstract class HashTable {
     protected int size;
-    protected Node[] buckets; // Array de nós (cabeças das listas encadeadas)
+    protected Node[] buckets;
     protected int collisions = 0;
-    protected int count = 0;   // total de chaves inseridas
-    protected final double loadFactor = 0.75; // Fator de Carga
+    protected int count = 0;
+    protected final double loadFactor = 0.75;
 
-    // Nó para a lista encadeada (chaining)
-    protected static class Node { // Classe Node está correta
+    protected static class Node {
         String key;
-        Node next; // Campo next pertence a Node
+        Node next;
 
         Node(String key) {
             this.key = key;
-            this.next = null; // 'this' aqui se refere à instância de Node, 'this.next' está ok
+            this.next = null;
         }
     }
 
     public HashTable() {
-        this(16); // Capacidade inicial padrão
+        this(16);
     }
 
-    // Construtor customizado
     public HashTable(int initialCapacity) {
         this.size = initialCapacity;
-        this.buckets = new Node[size]; // 'this.buckets' e 'this.size' estão corretos
+        this.buckets = new Node[size];
     }
 
     public void insert(String key) {
@@ -34,13 +29,13 @@ public abstract class HashTable {
             resize();
         }
         int idx = hash(key);
-        Node newNode = new Node(key); // newNode é do tipo Node
+        Node newNode = new Node(key);
 
-        if (buckets[idx] == null) { // Acesso a buckets[idx] está correto
+        if (buckets[idx] == null) {
             buckets[idx] = newNode;
         } else {
             collisions++;
-            newNode.next = buckets[idx]; // newNode.next e buckets[idx] (que é um Node) estão corretos
+            newNode.next = buckets[idx];
             buckets[idx] = newNode;
         }
         count++;
@@ -48,12 +43,12 @@ public abstract class HashTable {
 
     public boolean search(String key) {
         int idx = hash(key);
-        Node current = buckets[idx]; // current é do tipo Node
+        Node current = buckets[idx];
         while (current != null) {
             if (current.key.equals(key)) {
                 return true;
             }
-            current = current.next; // current.next está correto
+            current = current.next;
         }
         return false;
     }
@@ -63,13 +58,13 @@ public abstract class HashTable {
     }
 
     public int[] getDistribution() {
-        int[] dist = new int[size]; // size está correto
+        int[] dist = new int[size];
         for (int i = 0; i < size; i++) {
-            Node current = buckets[i]; // current é do tipo Node
+            Node current = buckets[i];
             int bucketSize = 0;
             while (current != null) {
                 bucketSize++;
-                current = current.next; // current.next está correto
+                current = current.next;
             }
             dist[i] = bucketSize;
         }
@@ -77,28 +72,28 @@ public abstract class HashTable {
     }
 
     private void resize() {
-        Node[] oldBuckets = this.buckets; // this.buckets está correto
-        int oldSize = this.size; // this.size está correto
+        Node[] oldBuckets = this.buckets;
+        int oldSize = this.size;
 
         this.size = oldSize * 2;
-        this.buckets = new Node[this.size]; // this.buckets e this.size estão corretos
+        this.buckets = new Node[this.size];
         this.count = 0;
 
         for (int i = 0; i < oldSize; i++) {
-            Node current = oldBuckets[i]; // current é Node
+            Node current = oldBuckets[i];
             while (current != null) {
                 String keyToRehash = current.key;
                 int newIdx = hash(keyToRehash);
 
-                Node newNode = new Node(keyToRehash); // newNode é Node
-                if (this.buckets[newIdx] == null) { // this.buckets está correto
+                Node newNode = new Node(keyToRehash);
+                if (this.buckets[newIdx] == null) {
                     this.buckets[newIdx] = newNode;
                 } else {
-                    newNode.next = this.buckets[newIdx]; // newNode.next e this.buckets[newIdx] (Node) estão corretos
+                    newNode.next = this.buckets[newIdx];
                     this.buckets[newIdx] = newNode;
                 }
                 this.count++;
-                current = current.next; // current.next está correto
+                current = current.next;
             }
         }
     }
